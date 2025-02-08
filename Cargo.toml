@@ -1,0 +1,49 @@
+[package]
+name    = "salfa-gate"
+version = "0.1.0"
+authors = ["Salfa Chang <me@salfa.cc>"]
+edition = "2024"
+
+autobenches  = false
+autoexamples = false
+autotests    = false
+publish      = false
+
+
+[dependencies]
+esp-alloc        = "0.6"
+static_cell      = "2.1"
+toml-cfg         = "0.2"
+reqwless         = { version = "0.13", features = ["alloc"] }
+heapless         = { version = "0.8", features = ["portable-atomic"] }
+esp-hal          = { version = "0.23", features = ["esp32c2"] }
+esp-hal-embassy  = { version = "0.6", features = ["esp32c2"] }
+esp-wifi         = { version = "0.12", features = ["esp32c2", "wifi"] }
+embassy-executor = { version = "0.7", features = ["task-arena-size-32768"] }
+embassy-time     = { version = "0.4", features = ["generic-queue-64"] }
+
+
+[dependencies.esp-println]
+default-features = false
+version          = "0.13"
+features         = ["esp32c2", "uart", "critical-section"]
+[dependencies.embassy-net]
+version  = "0.6"
+features = ["dhcpv4-hostname", "tcp", "dns"]
+[dependencies.esp-backtrace]
+version = "0.15"
+features = [
+    "esp32c2",
+    "println",
+    "panic-handler",
+    "exception-handler",
+    "custom-halt",
+]
+
+
+[profile.dev.package]
+esp-hal.opt-level  = 3
+esp-wifi.opt-level = 3
+[profile.release]
+debug = true
+lto   = true

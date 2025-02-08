@@ -1,0 +1,14 @@
+[env]
+
+
+[alias]
+rr = "run --release"
+br = "build --release"
+
+
+[build]
+target    = "riscv32imc-unknown-none-elf"
+rustflags = ["-C", "link-arg=-Tlinkall.x", "-C", "force-frame-pointers"]
+
+[target.riscv32imc-unknown-none-elf]
+runner = "espflash flash -S --monitor"
