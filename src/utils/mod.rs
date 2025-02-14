@@ -1,12 +1,20 @@
 ///
-/// Re-export the necessary modules.
+/// Exports
 ///
-pub use esp_hal::{self as hal, riscv};
 #[allow(unused_imports)]
-pub use esp_println::{dbg, print, println};
-pub use init::{ispa_init, wifi_init};
+pub use config::{CONFIG, Config};
+pub use esp_hal::{self as hal};
 
-mod init;
+///
+/// Exports
+///
+pub mod init;
+pub mod log;
+
+///
+/// Exports
+///
+mod config;
 mod macros;
 
 ///
@@ -14,7 +22,7 @@ mod macros;
 ///
 #[unsafe(no_mangle)]
 fn custom_halt() -> ! {
-    riscv::interrupt::disable();
-    println!("Halted! Interrupts disabled.");
+    hal::riscv::interrupt::disable();
+    log::warn!("Halted! Interrupts disabled.");
     loop {}
 }

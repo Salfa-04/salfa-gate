@@ -1,4 +1,5 @@
 [env]
+ESP_LOG = "debug" # trace, debug, info, warn, error, off
 
 
 [alias]

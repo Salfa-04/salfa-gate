@@ -1,4 +1,4 @@
-use crate::{dbg, hal, init_ticker};
+use crate::{hal, init_ticker, log::dbg};
 use embassy_net::Stack;
 use hal::rng::Rng;
 use net_buf::NetBuffer;
@@ -7,7 +7,7 @@ use reqwless::request::Method;
 ///
 /// local modules
 ///
-mod email;
+// mod email;
 mod net_buf;
 
 #[super::task]
@@ -20,7 +20,7 @@ pub async fn wifi_task(stack: Stack<'static>, rng: Rng) -> ! {
     let (mut client, buf) = buffer.configure(stack);
 
     let mut request = client
-        .request(Method::GET, "https://api.salfa.cc")
+        .request(Method::GET, "https://api.cloudflare.com/")
         .await
         .unwrap();
 

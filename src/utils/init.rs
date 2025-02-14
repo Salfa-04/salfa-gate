@@ -1,20 +1,26 @@
+//!
+//! # init
+//!
+
+use crate::{Config, hal};
+use core::str::FromStr;
+
 ///
 /// Import the necessary modules.
 ///
-use crate::hal;
-use core::str::FromStr;
 use embassy_executor::SendSpawner;
 use embassy_net::{DhcpConfig, Runner, Stack, StackResources};
 use esp_hal_embassy::InterruptExecutor;
-use esp_wifi::wifi::Configuration::Client;
-use esp_wifi::wifi::{ClientConfiguration, WifiStaDevice};
-use esp_wifi::wifi::{WifiController, WifiDevice};
-use esp_wifi::{EspWifiController, wifi::new_with_mode};
-use hal::interrupt::software::SoftwareInterruptControl as SIT;
+use esp_wifi::{EspWifiController, wifi};
+use hal::interrupt::software::SoftwareInterruptControl as SIC;
 use hal::peripherals::{RADIO_CLK, RNG, TIMG0, WIFI};
+use hal::peripherals::{SW_INTERRUPT, SYSTIMER};
 use hal::timer::{systimer::SystemTimer as ST, timg::TimerGroup};
 use hal::{interrupt::Priority as P, rng::Rng};
 use static_cell::StaticCell;
+use wifi::{ClientConfiguration, WifiStaDevice};
+use wifi::{Configuration::Client, new_with_mode};
+use wifi::{WifiController, WifiDevice};
 
 ///
 /// # ispa_init
@@ -35,14 +41,14 @@ use static_cell::StaticCell;
 ///
 /// ## Example
 /// ```
-/// let st = SystemTimer::new(p.SYSTIMER);
-/// let sw_it = SoftwareInterruptControl::new(p.SW_INTERRUPT);
-///
-/// let ispa = ispa_init(st, sw_it);
+/// let p = (p.SYSTIMER, p.SW_INTERRUPT);
+/// let ispa = ispa_init(p);
 /// ```
 ///
-pub fn ispa_init(st: ST, sw_it: SIT) -> (SendSpawner, SendSpawner, SendSpawner) {
-    esp_alloc::heap_allocator!(1024 * 72);
+pub fn ispa_init(p: (SYSTIMER, SW_INTERRUPT)) -> (SendSpawner, SendSpawner, SendSpawner) {
+    //  SRAM: 272 KB (16 KB reserved for Cache)             => 256 KB
+    esp_alloc::heap_allocator!(1024 * 72); // 72 KB :   26% of 256 KB
+    esp_println::logger::init_logger_from_env(); // Initialize logger
 
     static EXECUTOR: StaticCell<(
         InterruptExecutor<0>,
@@ -50,12 +56,12 @@ pub fn ispa_init(st: ST, sw_it: SIT) -> (SendSpawner, SendSpawner, SendSpawner) 
         InterruptExecutor<2>,
     )> = StaticCell::new();
 
-    esp_hal_embassy::init([st.alarm0, st.alarm1, st.alarm2]);
-
+    let p: (ST, SIC) = (ST::new(p.0), SIC::new(p.1));
+    esp_hal_embassy::init([p.0.alarm0, p.0.alarm1, p.0.alarm2]);
     let executor = EXECUTOR.init((
-        InterruptExecutor::new(sw_it.software_interrupt0),
-        InterruptExecutor::new(sw_it.software_interrupt1),
-        InterruptExecutor::new(sw_it.software_interrupt2),
+        InterruptExecutor::new(p.1.software_interrupt0),
+        InterruptExecutor::new(p.1.software_interrupt1),
+        InterruptExecutor::new(p.1.software_interrupt2),
     ));
 
     (
@@ -98,13 +104,27 @@ pub fn wifi_init(
     Stack<'static>,
     Rng,
 ) {
-    let config = crate::CONFIG;
+    let Config {
+        wifi_ssid,
+        wifi_psk,
+        hostname,
+        ..
+    } = crate::CONFIG;
 
     let (ssid, password, dhcpv4_hostname) = (
-        FromStr::from_str(config.wifi_ssid).expect("WIFI SSID name too long: [>32]"),
-        FromStr::from_str(config.wifi_psk).expect("WIFI password too long: [>64]"),
-        FromStr::from_str(config.hostname).expect("DHCPv4 hostname too long: [>32]"),
+        FromStr::from_str(wifi_ssid).expect("WIFI SSID name too long: [>32]"),
+        FromStr::from_str(wifi_psk).expect("WIFI password too long: [>64]"),
+        FromStr::from_str(hostname).expect("DHCPv4 hostname too long: [>32]"),
     );
+
+    let mut dhcpv4_config = DhcpConfig::default();
+    let wifi_config = Client(ClientConfiguration {
+        ssid,
+        password,
+        ..Default::default()
+    });
+
+    dhcpv4_config.hostname = Some(dhcpv4_hostname);
 
     let mut rng = Rng::new(rng);
     let ewc = {
@@ -114,25 +134,16 @@ pub fn wifi_init(
         EWC.init(esp_wifi::init(t, rng, r_clk).unwrap())
     };
 
-    let config = Client(ClientConfiguration {
-        ssid,
-        password,
-        ..Default::default()
-    });
-
     let (driver, mut controller) = {
         // safe to unwrap here, as we know it is a hardware failure
         new_with_mode(ewc, wifi, WifiStaDevice).unwrap()
     };
 
     // set the configuration, safe to unwrap here
-    controller.set_configuration(&config).unwrap();
-
+    controller.set_configuration(&wifi_config).unwrap();
     // Create the network stack and runner for the wifi driver
     static STACK: StaticCell<StackResources<8>> = StaticCell::new();
-    let mut config = DhcpConfig::default();
-    config.hostname = Some(dhcpv4_hostname);
-    let config = embassy_net::Config::dhcpv4(config);
+    let config = embassy_net::Config::dhcpv4(dhcpv4_config);
     let seed = (rng.random() as u64) << 32 | rng.random() as u64;
     let resources = STACK.init(StackResources::new());
     let (stack, runner) = {

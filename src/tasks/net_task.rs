@@ -1,4 +1,4 @@
-use crate::{dbg, init_ticker};
+use crate::{init_ticker, log::dbg};
 
 use embassy_net::Runner;
 use esp_wifi::wifi::{WifiController, WifiEvent, WifiState};

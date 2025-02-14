@@ -1,27 +1,24 @@
 #![no_std]
 #![no_main]
+#![feature(impl_trait_in_assoc_type)]
 
 use crate::utils::*;
-use config::CONFIG;
 use esp_backtrace as _;
-
 extern crate alloc;
 
-mod config;
 mod tasks;
 mod utils;
 
 #[esp_hal_embassy::main]
-async fn start(spaw: embassy_executor::Spawner) {
+async fn entry(spaw: embassy_executor::Spawner) {
     let p = {
         use hal::{Config, clock::CpuClock, init};
         init(Config::default().with_cpu_clock(CpuClock::max()))
     };
 
     let _ispa = {
-        use hal::interrupt::software::SoftwareInterruptControl as SI;
-        use hal::timer::systimer::SystemTimer as ST;
-        ispa_init(ST::new(p.SYSTIMER), SI::new(p.SW_INTERRUPT))
+        // Initialize the ISPA& System
+        init::ispa_init((p.SYSTIMER, p.SW_INTERRUPT))
     };
 
     {
@@ -35,7 +32,7 @@ async fn start(spaw: embassy_executor::Spawner) {
         // Spawn the WiFi task
         let wifi = {
             // Initialize the WiFi module
-            wifi_init((p.TIMG0, p.RNG, p.RADIO_CLK, p.WIFI))
+            init::wifi_init((p.TIMG0, p.RNG, p.RADIO_CLK, p.WIFI))
         };
 
         spaw.must_spawn(tasks::conn_task(wifi.0));

@@ -11,34 +11,35 @@ publish      = false
 
 
 [dependencies]
-esp-alloc        = "0.6"
-static_cell      = "2.1"
+reqwless = { version = "0.13", features = ["alloc"] }
+heapless = { version = "0.8", features = ["portable-atomic"] }
+
+
+log              = "0.4"
 toml-cfg         = "0.2"
-reqwless         = { version = "0.13", features = ["alloc"] }
-heapless         = { version = "0.8", features = ["portable-atomic"] }
-esp-hal          = { version = "0.23", features = ["esp32c2"] }
-esp-hal-embassy  = { version = "0.6", features = ["esp32c2"] }
-esp-wifi         = { version = "0.12", features = ["esp32c2", "wifi"] }
-embassy-executor = { version = "0.7", features = ["task-arena-size-32768"] }
+static_cell      = "2.1"
+esp-alloc        = "0.6"
+esp-hal          = { version = "0.23", features = ["esp32c2", "log"] }
+esp-hal-embassy  = { version = "0.6", features = ["esp32c2", "log"] }
+esp-wifi         = { version = "0.12", features = ["esp32c2", "log", "wifi"] }
+embassy-executor = { version = "0.7", features = ["nightly"] }
 embassy-time     = { version = "0.4", features = ["generic-queue-64"] }
+embassy-net      = { version = "0.6", features = ["dhcpv4-hostname", "tcp", "dns"] }
 
-
-[dependencies.esp-println]
-default-features = false
-version          = "0.13"
-features         = ["esp32c2", "uart", "critical-section"]
-[dependencies.embassy-net]
-version  = "0.6"
-features = ["dhcpv4-hostname", "tcp", "dns"]
-[dependencies.esp-backtrace]
-version = "0.15"
-features = [
+esp-println = { version = "0.13", features = [
+    "esp32c2",
+    "log",
+    "colors",
+    "critical-section",
+    "uart",
+], default-features = false }
+esp-backtrace = { version = "0.15", features = [
     "esp32c2",
     "println",
     "panic-handler",
     "exception-handler",
     "custom-halt",
-]
+] }
 
 
 [profile.dev.package]
