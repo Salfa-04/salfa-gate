@@ -2,8 +2,12 @@
 #![no_main]
 
 use crate::utils::*;
+use config::CONFIG;
 use esp_backtrace as _;
 
+extern crate alloc;
+
+mod config;
 mod tasks;
 mod utils;
 
@@ -18,7 +22,7 @@ async fn start(spaw: embassy_executor::Spawner) {
         use hal::interrupt::software::SoftwareInterruptControl as SI;
         use hal::timer::systimer::SystemTimer as ST;
         ispa_init(ST::new(p.SYSTIMER), SI::new(p.SW_INTERRUPT))
-    }; //? ESP32 & Embassy Started Successfully
+    };
 
     {
         // Spawn the LED task

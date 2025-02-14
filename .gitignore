@@ -1,4 +1,6 @@
-target/
+# Directories
+/target
 
-cfg.toml
-Cargo.lock
+# Files
+/cfg.toml
+/Cargo.lock

@@ -86,7 +86,7 @@ pub fn ispa_init(st: ST, sw_it: SIT) -> (SendSpawner, SendSpawner, SendSpawner) 
 /// ```
 /// let (wifi_controller, stack, runner) = {
 ///     let p = (p.TIMG0, p.RNG, p.RADIO_CLK, p.WIFI);
-///     wifi_init((p.TIMG0, p.RNG, p.RADIO_CLK, p.WIFI));
+///     wifi_init(p);
 /// }
 /// ```
 ///
@@ -100,7 +100,7 @@ pub fn wifi_init(
 ) {
     let config = crate::CONFIG;
 
-    let (wifi_ssid, password, dhcpv4_hostname) = (
+    let (ssid, password, dhcpv4_hostname) = (
         FromStr::from_str(config.wifi_ssid).expect("WIFI SSID name too long: [>32]"),
         FromStr::from_str(config.wifi_psk).expect("WIFI password too long: [>64]"),
         FromStr::from_str(config.hostname).expect("DHCPv4 hostname too long: [>32]"),
@@ -115,7 +115,7 @@ pub fn wifi_init(
     };
 
     let config = Client(ClientConfiguration {
-        ssid: wifi_ssid,
+        ssid,
         password,
         ..Default::default()
     });
@@ -129,12 +129,12 @@ pub fn wifi_init(
     controller.set_configuration(&config).unwrap();
 
     // Create the network stack and runner for the wifi driver
-    static STACK: StaticCell<StackResources<3>> = StaticCell::new();
+    static STACK: StaticCell<StackResources<8>> = StaticCell::new();
     let mut config = DhcpConfig::default();
     config.hostname = Some(dhcpv4_hostname);
     let config = embassy_net::Config::dhcpv4(config);
     let seed = (rng.random() as u64) << 32 | rng.random() as u64;
-    let resources: &mut StackResources<3> = STACK.init(StackResources::new());
+    let resources = STACK.init(StackResources::new());
     let (stack, runner) = {
         // Create the network stack and runner for the wifi driver
         embassy_net::new(driver, config, resources, seed)

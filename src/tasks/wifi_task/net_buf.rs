@@ -106,13 +106,16 @@ impl<'t, const N: usize, const SIZE: usize, const RX: usize> NetBuffer<'t, N, SI
     /// ## Example
     ///
     /// ```
-    /// let mut buffer: Buffer<8, 1024, 512> = Buffer::new(rng.clone());
+    /// let mut buffer: Buffer<8, 1024, 512> = Buffer::new(rng);
     /// let (client, buf) = buffer.configure(stack);
     ///
     /// ....
     ///
     /// let _ = request.send(buf).await;
     /// ```
+    ///
+    /// ## Note: `RNG` and `Stack` are `Copy` and `Clone` respectively.
+    ///
     ///
     pub fn configure(
         &'t mut self,

@@ -2,6 +2,8 @@
 
 
 [alias]
+# install espflash with:
+# doas pacman -S espflash
 rr = "run --release"
 br = "build --release"
 
