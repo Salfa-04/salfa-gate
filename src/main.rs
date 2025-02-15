@@ -2,9 +2,9 @@
 #![no_main]
 #![feature(impl_trait_in_assoc_type)]
 
-use crate::utils::*;
-use esp_backtrace as _;
 extern crate alloc;
+use crate::utils::prelude::*;
+use esp_backtrace as _;
 
 mod tasks;
 mod utils;
@@ -18,7 +18,7 @@ async fn entry(spaw: embassy_executor::Spawner) {
 
     let _ispa = {
         // Initialize the ISPA& System
-        init::ispa_init((p.SYSTIMER, p.SW_INTERRUPT))
+        utils::init::ispa_init((p.SYSTIMER, p.SW_INTERRUPT))
     };
 
     {
@@ -32,7 +32,7 @@ async fn entry(spaw: embassy_executor::Spawner) {
         // Spawn the WiFi task
         let wifi = {
             // Initialize the WiFi module
-            init::wifi_init((p.TIMG0, p.RNG, p.RADIO_CLK, p.WIFI))
+            utils::init::wifi_init((p.TIMG0, p.RNG, p.RADIO_CLK, p.WIFI))
         };
 
         spaw.must_spawn(tasks::conn_task(wifi.0));

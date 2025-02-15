@@ -11,17 +11,8 @@
 //! wifi_psk        = "PASSWORD"
 //! ```
 //!
-//! ## Example
-//!
-//! ```rust
-//! mod config;
-//! use config::CONFIG;
-//!
-//! let config = CONFIG;
-//! ```
-//!
 
-#[toml_cfg::toml_config]
+#[::toml_cfg::toml_config]
 struct Config {
     //?
     //? The Config for WiFi.

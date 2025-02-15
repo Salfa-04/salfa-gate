@@ -4,9 +4,7 @@
 //! This module contains the `NetBuffer` struct.
 //!
 
-use crate::hal;
-use hal::rng::Rng;
-
+use crate::hal::rng::Rng;
 use embassy_net::tcp::client::{TcpClient, TcpClientState};
 use embassy_net::{Stack, dns::DnsSocket};
 use reqwless::client::{HttpClient, TlsConfig, TlsVerify};

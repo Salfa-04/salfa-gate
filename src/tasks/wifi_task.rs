@@ -1,4 +1,7 @@
-use crate::{hal, init_ticker, log::dbg};
+use crate::init_ticker;
+use crate::utils::log::dbg;
+use crate::utils::prelude::*;
+
 use embassy_net::Stack;
 use hal::rng::Rng;
 use net_buf::NetBuffer;

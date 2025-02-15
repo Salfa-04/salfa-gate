@@ -10,7 +10,7 @@
 //! log::debug!("This is a debug message!");
 //! log::trace!("This is a trace message!");
 //!
-//! log::dbg!("This is a debug message!");
+//! log::dbg!("This is a dbg message!");
 //! log::print!("This is a print message!");
 //! log::println!("This is a println message!");
 //! ```

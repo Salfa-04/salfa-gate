@@ -19,8 +19,8 @@
 ///
 macro_rules! init_ticker {
     ($ms:expr) => {{
-        use embassy_time::Duration;
-        use embassy_time::Ticker;
+        use ::embassy_time::Duration;
+        use ::embassy_time::Ticker;
 
         Ticker::every(Duration::from_millis($ms))
     }};

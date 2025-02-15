@@ -2,7 +2,7 @@
 //! # init
 //!
 
-use crate::{Config, hal};
+use super::prelude::*;
 use core::str::FromStr;
 
 ///
@@ -47,8 +47,8 @@ use wifi::{WifiController, WifiDevice};
 ///
 pub fn ispa_init(p: (SYSTIMER, SW_INTERRUPT)) -> (SendSpawner, SendSpawner, SendSpawner) {
     //  SRAM: 272 KB (16 KB reserved for Cache)             => 256 KB
-    esp_alloc::heap_allocator!(1024 * 72); // 72 KB :   26% of 256 KB
-    esp_println::logger::init_logger_from_env(); // Initialize logger
+    ::esp_alloc::heap_allocator!(1024 * 72); // 72 KB :   26% of 256 KB
+    ::esp_println::logger::init_logger_from_env(); // Initialize logger
 
     static EXECUTOR: StaticCell<(
         InterruptExecutor<0>,
@@ -57,7 +57,7 @@ pub fn ispa_init(p: (SYSTIMER, SW_INTERRUPT)) -> (SendSpawner, SendSpawner, Send
     )> = StaticCell::new();
 
     let p: (ST, SIC) = (ST::new(p.0), SIC::new(p.1));
-    esp_hal_embassy::init([p.0.alarm0, p.0.alarm1, p.0.alarm2]);
+    ::esp_hal_embassy::init([p.0.alarm0, p.0.alarm1, p.0.alarm2]);
     let executor = EXECUTOR.init((
         InterruptExecutor::new(p.1.software_interrupt0),
         InterruptExecutor::new(p.1.software_interrupt1),
@@ -109,7 +109,7 @@ pub fn wifi_init(
         wifi_psk,
         hostname,
         ..
-    } = crate::CONFIG;
+    } = CONFIG;
 
     let (ssid, password, dhcpv4_hostname) = (
         FromStr::from_str(wifi_ssid).expect("WIFI SSID name too long: [>32]"),
@@ -148,7 +148,7 @@ pub fn wifi_init(
     let resources = STACK.init(StackResources::new());
     let (stack, runner) = {
         // Create the network stack and runner for the wifi driver
-        embassy_net::new(driver, config, resources, seed)
+        ::embassy_net::new(driver, config, resources, seed)
     };
 
     (controller, runner, stack, rng)

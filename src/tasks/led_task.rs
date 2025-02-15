@@ -1,5 +1,5 @@
-use crate::{hal, init_ticker};
-use hal::gpio::OutputOpenDrain as Output;
+use crate::hal::gpio::OutputOpenDrain as Output;
+use crate::init_ticker;
 
 #[super::task]
 pub async fn led_task(mut bled: Output<'static>) {
