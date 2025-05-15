@@ -18,23 +18,23 @@ heapless = { version = "0.8", features = ["portable-atomic"] }
 log              = "0.4"
 toml-cfg         = "0.2"
 static_cell      = "2.1"
-esp-alloc        = "0.6"
-esp-hal          = { version = "0.23", features = ["esp32c2", "log"] }
-esp-hal-embassy  = { version = "0.6", features = ["esp32c2", "log"] }
-esp-wifi         = { version = "0.12", features = ["esp32c2", "log", "wifi"] }
+esp-alloc        = "0.7"
+esp-hal          = { version = "1.0.0-beta", features = ["esp32c3", "log"] }
+esp-hal-embassy  = { version = "0.7", features = ["esp32c3", "log"] }
+esp-wifi         = { version = "0.13", features = ["esp32c3", "log", "wifi"] }
 embassy-executor = { version = "0.7", features = ["nightly"] }
 embassy-time     = { version = "0.4", features = ["generic-queue-64"] }
 embassy-net      = { version = "0.6", features = ["dhcpv4-hostname", "tcp", "dns"] }
 
 esp-println = { version = "0.13", features = [
-    "esp32c2",
+    "esp32c3",
     "log",
     "colors",
     "critical-section",
     "uart",
 ], default-features = false }
 esp-backtrace = { version = "0.15", features = [
-    "esp32c2",
+    "esp32c3",
     "println",
     "panic-handler",
     "exception-handler",
